@@ -11,9 +11,21 @@ vim.o.termguicolors = true
 vim.g.copilot_node_command = '/usr/bin/node'
 vim.o.updatetime = 300
 vim.o.timeoutlen = 500
+vim.opt.encoding = "utf-8"
 
 -- Set leader key
 vim.g.mapleader = ' '
+
+-- Function to get Python path (for LSP switching)
+local function get_python_path()
+    local conda_env = vim.fn.getenv("CONDA_PREFIX")
+    if conda_env ~= vim.NIL and conda_env ~= "" then
+        return conda_env .. "/bin/python"
+    else
+        return vim.g.python3_host_prog
+    end
+end
+    
 
 -- Plugin management with lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -122,6 +134,33 @@ require("lazy").setup({
     dependencies = { "nvim-lua/plenary.nvim" },
   },
 
+  -- show conda env
+  {
+  'nvim-lualine/lualine.nvim',
+  dependencies = { 'nvim-tree/nvim-web-devicons' },
+  config = function()
+    local function conda_env()
+      local env = vim.fn.getenv("CONDA_DEFAULT_ENV")
+      return env ~= vim.NIL and env ~= "" and "🐍 " .. env or ""
+    end
+
+    require('lualine').setup {
+      options = {
+          component_separators = {left = '|', right = '|'},
+          section_separators = {left = '', right = ''},
+          theme = 'neosolarized',
+      },
+      sections = {
+        lualine_a = {'mode'},
+        lualine_b = {'branch'},
+        lualine_c = {'filename', conda_env},
+        lualine_x = {'progress'},
+        lualine_y = {'location'}
+      },
+    }
+  end
+  },
+
   -- Add other plugins as needed
 })
 
@@ -135,6 +174,9 @@ local capabilities = require('cmp_nvim_lsp').default_capabilities()
 
 require("lspconfig").pyright.setup({
   capabilities = capabilities,
+  on_init = function(client)
+      client.config.settings.python.pythonPath = get_python_path()
+  end,
   on_attach = function(client, bufnr)
     require "lsp_signature".on_attach({
       bind = true,
