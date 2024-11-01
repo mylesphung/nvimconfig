@@ -82,7 +82,7 @@ require("lazy").setup({
           keymap = {
             accept = false,
             accept_word = false,
-            accept_line = "<Tab>",
+            accept_line = "<S-Tab>",
             next = "<M-]>",
             prev = "<M-[>",
             dismiss = "<C-]>",
@@ -141,7 +141,7 @@ require("lazy").setup({
   config = function()
     local function conda_env()
       local env = vim.fn.getenv("CONDA_DEFAULT_ENV")
-      return env ~= vim.NIL and env ~= "" and "🐍 " .. env or ""
+      return env ~= vim.NIL and env ~= "" and "🐍: " .. env or ""
     end
 
     require('lualine').setup {
@@ -258,6 +258,7 @@ vim.api.nvim_set_keymap('n', '<leader>cp', ':Copilot panel<CR>', {noremap = true
 
 -- Python path for LSP (adjust as needed for your Miniconda setup)
 vim.g.python3_host_prog = '~/miniconda3/bin/python'
+vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, { noremap = true, silent = true })
 
 -- You may want to add Conda environment switching commands here
 -- For example:
